@@ -6,23 +6,23 @@ mov ss, ax
 mov ds, ax
 mov es, ax
  
-mov si, welcome_msg
-call print_string
+disk_reset:
+    xor ah, ah ; ah=0, reset drive head
+    int 13h
+    jc disk_reset
  
-jmp $
+disk_read:
+    mov ah, 0x02 ; with interrupt 3h: reading!
+    mov al, 10 ; read 10 sectors
+    mov cl, 2  ; from sector 2
+    mov bx, 0x8000 ; save data to location 0x8000
  
-print_string:
-    mov ah, 0eh     ; output with interrupt 10h
-.next_char:
-    lodsb           ; reads one bytes and saves it to AL
-    cmp al, 0       ; was the nullbyte read?
-    je .done       ; if yes: finished
-    int 10h         ; otherwise: show current character from AL
-    jmp .next_char   ; and go on with next char
-.done:
-    ret
+    mov ch, 0
+    mov dh, 0
+    int 13h
+    jc disk_read
  
-welcome_msg db 'Hello World!', 0
+    jmp 0x0000:0x8000   ; jump to the new program, hooray
  
-times 510-($-$$) hlt
-dw 0xAA55
+times 510-($-$$) db 0
+dw 0xaa55
