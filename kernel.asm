@@ -6,8 +6,11 @@ mov ss, ax
 mov ds, ax
 mov es, ax
 
+cli
+
+%include "a20.asm"
+
 enter_pmode:
-    cli
     lgdt [gdtr]
     mov eax, cr0
     or eax, 1
