@@ -1,6 +1,6 @@
 romimage: file="$HOME/opt/bochs/share/bochs/BIOS-bochs-latest"
 vgaromimage: file="$HOME/opt/bochs/share/bochs/VGABIOS-elpin-2.40"
-boot: floppy
-floppya: 1_44="sos.img", status=inserted
+boot: disk
+ata0-master: type=disk, path="sos.img", mode=flat
 cpu: count=1, ips=4000000, reset_on_triple_fault=0
 magic_break: enabled=1
