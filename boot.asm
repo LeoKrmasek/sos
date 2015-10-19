@@ -4,7 +4,7 @@ align 4
     dd 0003h ; set align boot modules to page boundaries, supply memory map
     dd -(1BADB002h + 0003h)
 
-section .bootstrap_stack
+section .bootstrap_stack nobits
 stack_bottom:
     resb 16384 ; 16 KiB
 stack_top:
