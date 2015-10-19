@@ -1,5 +1,9 @@
+#include "arch/x86/gdt.h"
+
 void kernel_main()
 {
+    gdt_setup();
+
     char *vidmem = (char*) 0xb8000;
     vidmem[0] = 'H';
     vidmem[2] = 'e';
