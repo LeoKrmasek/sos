@@ -25,4 +25,5 @@ void idt_setup()
 
 
     asm volatile("lidt (%0)" :: "m"(idt_desc));
+    asm volatile("sti");
 }
