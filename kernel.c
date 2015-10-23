@@ -1,8 +1,10 @@
+#include "arch/x86/idt.h"
 #include "arch/x86/gdt.h"
 
 void kernel_main()
 {
     gdt_setup();
+    idt_setup();
 
     char *vidmem = (char*) 0xb8000;
     vidmem[0] = 'H';

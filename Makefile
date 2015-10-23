@@ -8,9 +8,11 @@ all: image kernel kernel-install
 kernel:
 	$(ASM) arch/x86/boot.asm -o arch/x86/boot.o -f elf
 	$(ASM) arch/x86/gdt.asm -o arch/x86/gdt_asm.o -f elf
+	$(ASM) arch/x86/idt.asm -o arch/x86/idt_asm.o -f elf
 	$(GCC) -c kernel.c -o kernel.o $(GCCFLAGS)
 	$(GCC) -c arch/x86/gdt.c -o arch/x86/gdt.o $(GCCFLAGS)
-	$(GCC) -T kernel.ld -o sos-kernel.img -ffreestanding -O2 -nostdlib arch/x86/boot.o kernel.o arch/x86/gdt_asm.o arch/x86/gdt.o -lgcc
+	$(GCC) -c arch/x86/idt.c -o arch/x86/idt.o $(GCCFLAGS)
+	$(GCC) -T kernel.ld -o sos-kernel.img -ffreestanding -O2 -nostdlib arch/x86/boot.o kernel.o arch/x86/gdt_asm.o arch/x86/gdt.o arch/x86/idt.o arch/x86/idt_asm.o -lgcc
 
 kernel-install:
 	sudo losetup /dev/loop1 sos.img -o 1048576
