@@ -1,18 +1,21 @@
 ASM = nasm
 ASMFLAGS =
 GCC = $(HOME)/opt/cross/bin/i586-elf-gcc
-GCCFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+GCCFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude
+
+C_OBJECTS = $(patsubst %.c, %.o, $(shell find . -name "*.c"))
+ASM_OBJECTS = $(patsubst %.asm, %_asm.o, $(shell find . -name "*.asm"))
 
 all: image kernel kernel-install
 
-kernel:
-	$(ASM) arch/x86/boot.asm -o arch/x86/boot.o -f elf
-	$(ASM) arch/x86/gdt.asm -o arch/x86/gdt_asm.o -f elf
-	$(ASM) arch/x86/idt.asm -o arch/x86/idt_asm.o -f elf
-	$(GCC) -c kernel.c -o kernel.o $(GCCFLAGS)
-	$(GCC) -c arch/x86/gdt.c -o arch/x86/gdt.o $(GCCFLAGS)
-	$(GCC) -c arch/x86/idt.c -o arch/x86/idt.o $(GCCFLAGS)
-	$(GCC) -T kernel.ld -o sos-kernel.img -ffreestanding -O2 -nostdlib arch/x86/boot.o kernel.o arch/x86/gdt_asm.o arch/x86/gdt.o arch/x86/idt.o arch/x86/idt_asm.o -lgcc
+%_asm.o: %.asm
+	$(ASM) $< -o $@ -f elf
+
+%.o: %.c
+	$(GCC) -c $< -o $@ $(GCCFLAGS)
+
+kernel: $(C_OBJECTS) $(ASM_OBJECTS)
+	$(GCC) -T kernel.ld -o sos-kernel.img -ffreestanding -O2 -nostdlib $(C_OBJECTS) $(ASM_OBJECTS) -lgcc
 
 kernel-install:
 	sudo losetup /dev/loop1 sos.img -o 1048576
@@ -36,7 +39,6 @@ image:
 	sudo losetup -d /dev/loop1
 	
 clean:
-	rm arch/x86/*.o
-	rm *.o
+	rm $(ASM_OBJECTS) $(C_OBJECTS)
 	rm sos-kernel.img
 	rm sos.img

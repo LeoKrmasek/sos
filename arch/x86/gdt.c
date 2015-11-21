@@ -3,7 +3,7 @@
 
 extern void gdt_install();
 
-void gdt_set_entry(unsigned int pos, uint32_t base, uint32_t limit,
+static void gdt_set_entry(unsigned int pos, uint32_t base, uint32_t limit,
         uint8_t access_rights, uint8_t flags)
 {
     gdt[pos].base_lower = base & 0xffff;
