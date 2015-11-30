@@ -27,4 +27,6 @@ void kprintc(char c);
 
 void kprinti(int value);
 
+void kprintx(int value);
+
 #endif

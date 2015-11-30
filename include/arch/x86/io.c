@@ -74,3 +74,19 @@ void kprinti(int value) {
         kprintc((char)(digit + 48));
     }
 }
+
+void kprintx(int value) {
+    kprint("0x");
+
+    int divisor = power(16, 7);
+    for (int i = 0; i < 8; i++) {
+        short digit = value / divisor;
+        value %= divisor;
+        divisor /= 16;
+
+        if (digit < 10)
+            kprintc((char)(digit + 48));
+        else
+            kprintc((char)(digit + 55));
+    }
+}
