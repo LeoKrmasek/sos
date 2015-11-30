@@ -2,11 +2,17 @@ ASM = nasm
 ASMFLAGS =
 GCC = $(HOME)/opt/cross/bin/i586-elf-gcc
 GCCFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude
+GCC_TESTING = gcc # Use native compiler for developer's platform
+GCCFLAGS_TESTING = -m32 -std=gnu99 -O2 -Itest/include/libtap -Iinclude
 
-C_OBJECTS = $(patsubst %.c, %.o, $(shell find . -name "*.c"))
+C_OBJECTS = $(patsubst %.c, %.o, $(shell find . -path ./test -prune -o -name "*.c" -print))
 ASM_OBJECTS = $(patsubst %.asm, %_asm.o, $(shell find . -name "*.asm"))
+TEST_OBJECTS = $(patsubst %.c, %_test.o, $(shell find ./test/ -maxdepth 1 -name "*.c"))
 
 all: image kernel kernel-install
+
+%_test.o: %.c
+	$(GCC_TESTING) -c $< -o $@ $(GCCFLAGS_TESTING)
 
 %_asm.o: %.asm
 	$(ASM) $< -o $@ -f elf
@@ -37,8 +43,17 @@ image:
 	sudo losetup -d /dev/loop0
 	sudo umount /mnt
 	sudo losetup -d /dev/loop1
-	
+
+test: $(TEST_OBJECTS) $(C_OBJECTS) $(ASM_OBJECTS)
+	$(GCC_TESTING) -c test/include/libtap/tap.c -o test/include/libtap/tap.o $(GCCFLAGS_TESTING)
+	for file in $(TEST_OBJECTS); do \
+		$(GCC_TESTING) $$file $(C_OBJECTS) $(ASM_OBJECTS) test/include/libtap/tap.o -o a.out -m32 ; \
+		./a.out ; \
+	done
+	rm a.out
+
 clean:
-	rm $(ASM_OBJECTS) $(C_OBJECTS)
+	rm $(ASM_OBJECTS) $(C_OBJECTS) $(TEST_OBJECTS)
+	rm test/include/libtap/tap.o
 	rm sos-kernel.img
 	rm sos.img
